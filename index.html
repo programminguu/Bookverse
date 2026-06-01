@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BookVerse Pro Max</title>
+<title>BookVerse Ultra SaaS</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#060b18;
+background:#050816;
 color:white;
-overflow:hidden;
 }
 
-.center{
+/* LOGIN */
+#login{
 height:100vh;
 display:flex;
 justify-content:center;
@@ -26,8 +26,8 @@ background:linear-gradient(120deg,#020617,#0f172a);
 .box{
 background:rgba(255,255,255,0.05);
 padding:20px;
-border-radius:12px;
-width:260px;
+border-radius:14px;
+width:280px;
 backdrop-filter:blur(10px);
 }
 
@@ -35,8 +35,8 @@ input{
 width:100%;
 padding:10px;
 margin:5px 0;
-border-radius:8px;
 border:none;
+border-radius:8px;
 }
 
 button{
@@ -49,11 +49,12 @@ cursor:pointer;
 font-weight:bold;
 }
 
+/* APP */
 #app{
 display:none;
-padding:15px;
 }
 
+/* SIDEBAR */
 .sidebar{
 width:220px;
 height:100vh;
@@ -81,12 +82,18 @@ margin-left:220px;
 padding:15px;
 }
 
+/* CARDS */
 .card{
 background:rgba(255,255,255,0.05);
-padding:10px;
+padding:12px;
 margin:10px 0;
-border-radius:10px;
-animation:fade 0.5s ease;
+border-radius:12px;
+animation:fade 0.4s ease;
+transition:0.3s;
+}
+
+.card:hover{
+transform:translateY(-4px);
 }
 
 @keyframes fade{
@@ -94,6 +101,21 @@ from{opacity:0;transform:translateY(10px);}
 to{opacity:1;transform:translateY(0);}
 }
 
+/* PRODUCTS */
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+}
+
+.product img{
+width:100%;
+height:130px;
+border-radius:10px;
+object-fit:cover;
+}
+
+/* TOAST */
 .toast{
 position:fixed;
 bottom:20px;
@@ -103,35 +125,20 @@ padding:10px;
 border-radius:8px;
 display:none;
 }
-
-.loading{
-position:fixed;
-width:100%;
-height:100%;
-display:none;
-justify-content:center;
-align-items:center;
-background:#000;
-font-size:20px;
-}
 </style>
+
 </head>
 
 <body>
 
 <!-- LOGIN -->
-<div class="center" id="login">
+<div id="login">
+<h2>📚 BookVerse Login</h2>
 <div class="box">
-<h3>Login</h3>
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
+<input id="u" placeholder="Username">
+<input id="p" type="password" placeholder="Password">
 <button onclick="enter()">Login</button>
 </div>
-</div>
-
-<!-- LOADING -->
-<div class="loading" id="loading">
-Loading Dashboard...
 </div>
 
 <!-- APP -->
@@ -141,81 +148,112 @@ Loading Dashboard...
 <h3>📚 BookVerse AI</h3>
 <div class="nav" onclick="show('dash')">Dashboard</div>
 <div class="nav" onclick="show('store')">Store</div>
+<div class="nav" onclick="show('cart')">Cart</div>
 <div class="nav" onclick="show('orders')">Orders</div>
 <div class="nav" onclick="show('analytics')">Analytics</div>
 </div>
 
 <div class="main">
 
+<!-- DASHBOARD -->
 <div id="dash">
-<h2>Live Dashboard</h2>
+<h2>📊 Dashboard</h2>
 <div class="card">Revenue: ₹<span id="rev">12000</span></div>
-<div class="card">Orders: <span id="ord">45</span></div>
+<div class="card">Orders: <span id="ord">50</span></div>
 <div class="card">Users: <span id="usr">30</span></div>
 </div>
 
+<!-- STORE -->
 <div id="store" style="display:none;">
-<h2>Books Store</h2>
-<div id="books"></div>
+<h2>🛍 Store</h2>
+
+<div class="grid">
+
+<div class="card product">
+<img src="https://covers.openlibrary.org/b/id/9259256-L.jpg">
+<b>Atomic Habits</b>
+<p>₹499</p>
+<button onclick="add('Atomic Habits')">Add to Cart</button>
 </div>
 
+<div class="card product">
+<img src="https://covers.openlibrary.org/b/id/8231856-L.jpg">
+<b>Rich Dad Poor Dad</b>
+<p>₹399</p>
+<button onclick="add('Rich Dad Poor Dad')">Add to Cart</button>
+</div>
+
+<div class="card product">
+<img src="https://covers.openlibrary.org/b/id/11153261-L.jpg">
+<b>The Alchemist</b>
+<p>₹299</p>
+<button onclick="add('The Alchemist')">Add to Cart</button>
+</div>
+
+</div>
+</div>
+
+<!-- CART -->
+<div id="cart" style="display:none;">
+<h2>🛒 Cart</h2>
+<div id="cartBox"></div>
+</div>
+
+<!-- ORDERS -->
 <div id="orders" style="display:none;">
-<h2>Live Orders</h2>
-<div id="orderBox"></div>
+<h2>📦 Live Orders</h2>
+<div id="feed"></div>
 </div>
 
+<!-- ANALYTICS -->
 <div id="analytics" style="display:none;">
-<h2>Analytics</h2>
-<div class="card">Growth Chart Running...</div>
+<h2>📈 Analytics</h2>
+<div class="card">Growth Simulation Running...</div>
 </div>
 
 </div>
 
 </div>
 
-<div class="toast" id="toast">Action Done</div>
+<div class="toast" id="toast">Done</div>
 
 <script>
 
-let books=["Atomic Habits","Rich Dad Poor Dad","The Alchemist"];
+let cart=[];
 
+/* LOGIN */
 function enter(){
 document.getElementById("login").style.display="none";
-document.getElementById("loading").style.display="flex";
-
-setTimeout(()=>{
-document.getElementById("loading").style.display="none";
 document.getElementById("app").style.display="block";
-render();
-startFakeSystem();
-},2000);
+start();
 }
 
+/* NAV */
 function show(id){
-["dash","store","orders","analytics"].forEach(i=>{
-document.getElementById(i).style.display="none";
+["dash","store","cart","orders","analytics"].forEach(x=>{
+document.getElementById(x).style.display="none";
 });
 document.getElementById(id).style.display="block";
+
+if(id==="cart") renderCart();
 }
 
-function render(){
-let box=document.getElementById("books");
-box.innerHTML="";
-books.forEach(b=>{
-box.innerHTML+=`
-<div class="card">
-<b>${b}</b><br>
-<button onclick="action()">Add</button>
-<button onclick="action()">Buy</button>
-</div>
-`;
-});
-}
-
-function action(){
+/* CART */
+function add(item){
+cart.push(item);
 toast();
 }
 
+/* RENDER CART */
+function renderCart(){
+let box=document.getElementById("cartBox");
+box.innerHTML="";
+cart.forEach(c=>{
+box.innerHTML+=`<div class="card">${c}</div>`;
+});
+}
+
+/* TOAST */
 function toast(){
 let t=document.getElementById("toast");
 t.style.display="block";
@@ -223,19 +261,26 @@ setTimeout(()=>t.style.display="none",1000);
 }
 
 /* FAKE LIVE SYSTEM */
-function startFakeSystem(){
+function start(){
 
 setInterval(()=>{
-document.getElementById("rev").innerText = parseInt(document.getElementById("rev").innerText) + Math.floor(Math.random()*50);
-document.getElementById("ord").innerText = parseInt(document.getElementById("ord").innerText) + 1;
-document.getElementById("usr").innerText = parseInt(document.getElementById("usr").innerText) + (Math.random()>0.7?1:0);
 
-/* fake orders */
-let o=document.getElementById("orderBox");
-let names=["Rahul","Aman","Neha","Vikas"];
+document.getElementById("rev").innerText =
+parseInt(document.getElementById("rev").innerText)+Math.floor(Math.random()*100);
+
+document.getElementById("ord").innerText =
+parseInt(document.getElementById("ord").innerText)+1;
+
+document.getElementById("usr").innerText =
+parseInt(document.getElementById("usr").innerText)+(Math.random()>0.7?1:0);
+
+/* fake orders feed */
+let names=["Rahul","Aman","Neha","Vikas","John"];
 let books=["Atomic Habits","Rich Dad Poor Dad","Alchemist"];
 
-o.innerHTML = `<div class="card">${names[Math.floor(Math.random()*4)]} bought ${books[Math.floor(Math.random()*3)]}</div>` + o.innerHTML;
+document.getElementById("feed").innerHTML =
+`<div class="card">${names[Math.floor(Math.random()*5)]} bought ${books[Math.floor(Math.random()*3)]}</div>`
++ document.getElementById("feed").innerHTML;
 
 },2000);
 
