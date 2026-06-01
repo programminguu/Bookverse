@@ -3,40 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BookVerse Full Stack</title>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<title>BookVerse Pro Max</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#0b1220;
+background:#060b18;
 color:white;
+overflow:hidden;
 }
 
 .center{
 height:100vh;
 display:flex;
-flex-direction:column;
 justify-content:center;
 align-items:center;
+flex-direction:column;
+background:linear-gradient(120deg,#020617,#0f172a);
+}
+
+.box{
+background:rgba(255,255,255,0.05);
+padding:20px;
+border-radius:12px;
+width:260px;
+backdrop-filter:blur(10px);
 }
 
 input{
+width:100%;
 padding:10px;
-margin:5px;
-width:220px;
+margin:5px 0;
 border-radius:8px;
 border:none;
 }
 
 button{
+width:100%;
 padding:10px;
-width:220px;
-margin-top:5px;
 border:none;
 border-radius:20px;
 background:#22c55e;
@@ -44,8 +49,35 @@ cursor:pointer;
 font-weight:bold;
 }
 
-.app{
+#app{
 display:none;
+padding:15px;
+}
+
+.sidebar{
+width:220px;
+height:100vh;
+position:fixed;
+background:rgba(255,255,255,0.04);
+padding:15px;
+}
+
+.nav{
+padding:10px;
+margin:6px 0;
+background:rgba(255,255,255,0.05);
+border-radius:8px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.nav:hover{
+background:#22c55e;
+color:black;
+}
+
+.main{
+margin-left:220px;
 padding:15px;
 }
 
@@ -54,175 +86,159 @@ background:rgba(255,255,255,0.05);
 padding:10px;
 margin:10px 0;
 border-radius:10px;
+animation:fade 0.5s ease;
 }
 
-.row{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
+@keyframes fade{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
 }
 
-.smallbtn{
-width:auto;
-padding:6px 10px;
-border-radius:10px;
+.toast{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#22c55e;
+padding:10px;
+border-radius:8px;
+display:none;
+}
+
+.loading{
+position:fixed;
+width:100%;
+height:100%;
+display:none;
+justify-content:center;
+align-items:center;
+background:#000;
+font-size:20px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- AUTH -->
-<div class="center" id="auth">
-<h2>📚 BookVerse Login</h2>
-<input id="email" placeholder="Email">
+<!-- LOGIN -->
+<div class="center" id="login">
+<div class="box">
+<h3>Login</h3>
+<input id="user" placeholder="Username">
 <input id="pass" type="password" placeholder="Password">
+<button onclick="enter()">Login</button>
+</div>
+</div>
 
-<button onclick="signup()">Signup</button>
-<button onclick="login()">Login</button>
+<!-- LOADING -->
+<div class="loading" id="loading">
+Loading Dashboard...
 </div>
 
 <!-- APP -->
-<div class="app" id="app">
+<div id="app">
 
-<h2>📚 BookVerse Store</h2>
-<button onclick="logout()">Logout</button>
+<div class="sidebar">
+<h3>📚 BookVerse AI</h3>
+<div class="nav" onclick="show('dash')">Dashboard</div>
+<div class="nav" onclick="show('store')">Store</div>
+<div class="nav" onclick="show('orders')">Orders</div>
+<div class="nav" onclick="show('analytics')">Analytics</div>
+</div>
 
-<h3>Products</h3>
-<div id="products"></div>
+<div class="main">
 
-<h3>Cart</h3>
-<div id="cart"></div>
+<div id="dash">
+<h2>Live Dashboard</h2>
+<div class="card">Revenue: ₹<span id="rev">12000</span></div>
+<div class="card">Orders: <span id="ord">45</span></div>
+<div class="card">Users: <span id="usr">30</span></div>
+</div>
 
-<h3>Orders</h3>
-<div id="orders"></div>
+<div id="store" style="display:none;">
+<h2>Books Store</h2>
+<div id="books"></div>
+</div>
+
+<div id="orders" style="display:none;">
+<h2>Live Orders</h2>
+<div id="orderBox"></div>
+</div>
+
+<div id="analytics" style="display:none;">
+<h2>Analytics</h2>
+<div class="card">Growth Chart Running...</div>
+</div>
 
 </div>
+
+</div>
+
+<div class="toast" id="toast">Action Done</div>
 
 <script>
 
-/* FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID"
-};
+let books=["Atomic Habits","Rich Dad Poor Dad","The Alchemist"];
 
-firebase.initializeApp(firebaseConfig);
+function enter(){
+document.getElementById("login").style.display="none";
+document.getElementById("loading").style.display="flex";
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-/* AUTH */
-function signup(){
-auth.createUserWithEmailAndPassword(email.value, pass.value);
-}
-
-function login(){
-auth.signInWithEmailAndPassword(email.value, pass.value);
-}
-
-function logout(){
-auth.signOut();
-}
-
-/* STATE */
-auth.onAuthStateChanged(user=>{
-if(user){
-document.getElementById("auth").style.display="none";
+setTimeout(()=>{
+document.getElementById("loading").style.display="none";
 document.getElementById("app").style.display="block";
-loadProducts();
-loadCart();
-loadOrders();
-}else{
-document.getElementById("auth").style.display="flex";
-document.getElementById("app").style.display="none";
+render();
+startFakeSystem();
+},2000);
 }
+
+function show(id){
+["dash","store","orders","analytics"].forEach(i=>{
+document.getElementById(i).style.display="none";
 });
+document.getElementById(id).style.display="block";
+}
 
-/* PRODUCTS (STATIC) */
-let products=[
-"Atomic Habits",
-"Rich Dad Poor Dad",
-"The Alchemist",
-"Deep Work"
-];
-
-function loadProducts(){
-let box=document.getElementById("products");
+function render(){
+let box=document.getElementById("books");
 box.innerHTML="";
-
-products.forEach(p=>{
+books.forEach(b=>{
 box.innerHTML+=`
 <div class="card">
-<b>${p}</b><br>
-<button class="smallbtn" onclick="addCart('${p}')">Add to Cart</button>
+<b>${b}</b><br>
+<button onclick="action()">Add</button>
+<button onclick="action()">Buy</button>
 </div>
 `;
 });
 }
 
-/* CART */
-function addCart(book){
-let user=auth.currentUser;
-
-db.collection("cart").add({
-user:user.email,
-book:book
-});
-
-loadCart();
+function action(){
+toast();
 }
 
-/* LOAD CART */
-function loadCart(){
-let box=document.getElementById("cart");
-box.innerHTML="";
-
-db.collection("cart")
-.where("user","==",auth.currentUser.email)
-.get()
-.then(snap=>{
-snap.forEach(doc=>{
-box.innerHTML+=`
-<div class="card">
-${doc.data().book}
-</div>
-`;
-});
-});
+function toast(){
+let t=document.getElementById("toast");
+t.style.display="block";
+setTimeout(()=>t.style.display="none",1000);
 }
 
-/* PLACE ORDER */
-function placeOrder(book){
-let user=auth.currentUser;
+/* FAKE LIVE SYSTEM */
+function startFakeSystem(){
 
-db.collection("orders").add({
-user:user.email,
-book:book,
-status:"Processing"
-});
+setInterval(()=>{
+document.getElementById("rev").innerText = parseInt(document.getElementById("rev").innerText) + Math.floor(Math.random()*50);
+document.getElementById("ord").innerText = parseInt(document.getElementById("ord").innerText) + 1;
+document.getElementById("usr").innerText = parseInt(document.getElementById("usr").innerText) + (Math.random()>0.7?1:0);
 
-loadOrders();
-}
+/* fake orders */
+let o=document.getElementById("orderBox");
+let names=["Rahul","Aman","Neha","Vikas"];
+let books=["Atomic Habits","Rich Dad Poor Dad","Alchemist"];
 
-/* ORDERS */
-function loadOrders(){
-let box=document.getElementById("orders");
-box.innerHTML="";
+o.innerHTML = `<div class="card">${names[Math.floor(Math.random()*4)]} bought ${books[Math.floor(Math.random()*3)]}</div>` + o.innerHTML;
 
-db.collection("orders")
-.where("user","==",auth.currentUser.email)
-.get()
-.then(snap=>{
-snap.forEach(doc=>{
-box.innerHTML+=`
-<div class="card">
-${doc.data().book} - ${doc.data().status}
-</div>
-`;
-});
-});
+},2000);
+
 }
 
 </script>
