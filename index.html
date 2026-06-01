@@ -13,47 +13,6 @@ background:#050816;
 color:white;
 }
 
-/* LOGIN */
-#login{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-background:linear-gradient(120deg,#020617,#0f172a);
-}
-
-.box{
-background:rgba(255,255,255,0.05);
-padding:20px;
-border-radius:14px;
-width:280px;
-backdrop-filter:blur(10px);
-}
-
-input{
-width:100%;
-padding:10px;
-margin:5px 0;
-border:none;
-border-radius:8px;
-}
-
-button{
-width:100%;
-padding:10px;
-border:none;
-border-radius:20px;
-background:#22c55e;
-cursor:pointer;
-font-weight:bold;
-}
-
-/* APP */
-#app{
-display:none;
-}
-
 /* SIDEBAR */
 .sidebar{
 width:220px;
@@ -77,6 +36,7 @@ background:#22c55e;
 color:black;
 }
 
+/* MAIN */
 .main{
 margin-left:220px;
 padding:15px;
@@ -88,8 +48,8 @@ background:rgba(255,255,255,0.05);
 padding:12px;
 margin:10px 0;
 border-radius:12px;
-animation:fade 0.4s ease;
 transition:0.3s;
+animation:fade 0.3s ease;
 }
 
 .card:hover{
@@ -101,7 +61,7 @@ from{opacity:0;transform:translateY(10px);}
 to{opacity:1;transform:translateY(0);}
 }
 
-/* PRODUCTS */
+/* GRID */
 .grid{
 display:grid;
 grid-template-columns:repeat(3,1fr);
@@ -131,19 +91,7 @@ display:none;
 
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-<h2>📚 BookVerse Login</h2>
-<div class="box">
-<input id="u" placeholder="Username">
-<input id="p" type="password" placeholder="Password">
-<button onclick="enter()">Login</button>
-</div>
-</div>
-
-<!-- APP -->
-<div id="app">
-
+<!-- SIDEBAR -->
 <div class="sidebar">
 <h3>📚 BookVerse AI</h3>
 <div class="nav" onclick="show('dash')">Dashboard</div>
@@ -153,6 +101,7 @@ display:none;
 <div class="nav" onclick="show('analytics')">Analytics</div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
 <!-- DASHBOARD -->
@@ -213,20 +162,12 @@ display:none;
 
 </div>
 
-</div>
-
-<div class="toast" id="toast">Done</div>
+<!-- TOAST -->
+<div class="toast" id="toast">Action Done</div>
 
 <script>
 
 let cart=[];
-
-/* LOGIN */
-function enter(){
-document.getElementById("login").style.display="none";
-document.getElementById("app").style.display="block";
-start();
-}
 
 /* NAV */
 function show(id){
@@ -244,7 +185,7 @@ cart.push(item);
 toast();
 }
 
-/* RENDER CART */
+/* CART RENDER */
 function renderCart(){
 let box=document.getElementById("cartBox");
 box.innerHTML="";
@@ -261,7 +202,7 @@ setTimeout(()=>t.style.display="none",1000);
 }
 
 /* FAKE LIVE SYSTEM */
-function start(){
+function startFakeSystem(){
 
 setInterval(()=>{
 
@@ -276,7 +217,7 @@ parseInt(document.getElementById("usr").innerText)+(Math.random()>0.7?1:0);
 
 /* fake orders feed */
 let names=["Rahul","Aman","Neha","Vikas","John"];
-let books=["Atomic Habits","Rich Dad Poor Dad","Alchemist"];
+let books=["Atomic Habits","Rich Dad Poor Dad","The Alchemist"];
 
 document.getElementById("feed").innerHTML =
 `<div class="card">${names[Math.floor(Math.random()*5)]} bought ${books[Math.floor(Math.random()*3)]}</div>`
@@ -285,6 +226,9 @@ document.getElementById("feed").innerHTML =
 },2000);
 
 }
+
+/* start immediately */
+startFakeSystem();
 
 </script>
 
