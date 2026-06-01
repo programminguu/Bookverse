@@ -3,232 +3,234 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BookVerse Ultra SaaS</title>
+<title>BookVerse Ultra Pro</title>
 
 <style>
 body{
 margin:0;
-font-family:Arial;
-background:#050816;
+font-family:system-ui;
+background:linear-gradient(135deg,#050816,#0b1220);
 color:white;
+overflow-x:hidden;
 }
 
-/* SIDEBAR */
-.sidebar{
-width:220px;
-height:100vh;
-position:fixed;
-background:rgba(255,255,255,0.04);
-padding:15px;
+/* HERO */
+.hero{
+padding:60px 30px;
+text-align:center;
+background:radial-gradient(circle at top,#1f2937,#050816);
+animation:fadeDown 0.8s ease;
 }
 
-.nav{
-padding:10px;
-margin:6px 0;
-background:rgba(255,255,255,0.05);
-border-radius:8px;
+.hero h1{
+font-size:40px;
+margin:0;
+}
+
+.hero p{
+opacity:0.7;
+}
+
+/* SEARCH */
+.searchBox{
+margin-top:20px;
+display:flex;
+justify-content:center;
+}
+
+.searchBox input{
+width:60%;
+padding:12px;
+border-radius:12px;
+border:none;
+outline:none;
+}
+
+/* CATEGORY */
+.categories{
+display:flex;
+gap:10px;
+justify-content:center;
+margin:20px 0;
+flex-wrap:wrap;
+}
+
+.cat{
+padding:8px 14px;
+border-radius:20px;
+background:rgba(255,255,255,0.06);
 cursor:pointer;
 transition:0.3s;
 }
 
-.nav:hover{
+.cat:hover{
 background:#22c55e;
 color:black;
-}
-
-/* MAIN */
-.main{
-margin-left:220px;
-padding:15px;
-}
-
-/* CARDS */
-.card{
-background:rgba(255,255,255,0.05);
-padding:12px;
-margin:10px 0;
-border-radius:12px;
-transition:0.3s;
-animation:fade 0.3s ease;
-}
-
-.card:hover{
-transform:translateY(-4px);
-}
-
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
+transform:scale(1.05);
 }
 
 /* GRID */
 .grid{
 display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+padding:20px;
 }
 
-.product img{
+/* CARD */
+.card{
+background:rgba(255,255,255,0.05);
+border-radius:16px;
+padding:12px;
+transition:0.4s;
+animation:fadeUp 0.6s ease;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.card:hover{
+transform:translateY(-8px) scale(1.02);
+border-color:#22c55e;
+}
+
+img{
 width:100%;
-height:130px;
-border-radius:10px;
+height:160px;
 object-fit:cover;
+border-radius:12px;
 }
 
-/* TOAST */
-.toast{
-position:fixed;
-bottom:20px;
-right:20px;
-background:#22c55e;
+/* BUTTON */
+button{
+width:100%;
 padding:10px;
-border-radius:8px;
+margin-top:8px;
+border:none;
+border-radius:10px;
+background:#22c55e;
+cursor:pointer;
+font-weight:bold;
+transition:0.3s;
+}
+
+button:hover{
+background:#16a34a;
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes fadeDown{
+from{opacity:0;transform:translateY(-20px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+/* FADE OUT FILTER */
+.hide{
 display:none;
 }
 </style>
-
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-<h3>📚 BookVerse AI</h3>
-<div class="nav" onclick="show('dash')">Dashboard</div>
-<div class="nav" onclick="show('store')">Store</div>
-<div class="nav" onclick="show('cart')">Cart</div>
-<div class="nav" onclick="show('orders')">Orders</div>
-<div class="nav" onclick="show('analytics')">Analytics</div>
+<!-- HERO -->
+<div class="hero">
+<h1>📚 BookVerse Premium Store</h1>
+<p>Search. Explore. Discover best books instantly.</p>
+
+<div class="searchBox">
+<input id="search" onkeyup="filter()" placeholder="Search books...">
+</div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
-
-<!-- DASHBOARD -->
-<div id="dash">
-<h2>📊 Dashboard</h2>
-<div class="card">Revenue: ₹<span id="rev">12000</span></div>
-<div class="card">Orders: <span id="ord">50</span></div>
-<div class="card">Users: <span id="usr">30</span></div>
+<!-- CATEGORIES -->
+<div class="categories">
+<div class="cat" onclick="setCat('all')">All</div>
+<div class="cat" onclick="setCat('self')">Self Help</div>
+<div class="cat" onclick="setCat('business')">Business</div>
+<div class="cat" onclick="setCat('fiction')">Fiction</div>
 </div>
 
-<!-- STORE -->
-<div id="store" style="display:none;">
-<h2>🛍 Store</h2>
+<!-- PRODUCTS -->
+<div class="grid" id="grid">
 
-<div class="grid">
-
-<div class="card product">
+<div class="card" data-cat="self" data-name="Atomic Habits">
 <img src="https://covers.openlibrary.org/b/id/9259256-L.jpg">
-<b>Atomic Habits</b>
+<h3>Atomic Habits</h3>
 <p>₹499</p>
-<button onclick="add('Atomic Habits')">Add to Cart</button>
+<button>Add to Cart</button>
 </div>
 
-<div class="card product">
+<div class="card" data-cat="business" data-name="Rich Dad Poor Dad">
 <img src="https://covers.openlibrary.org/b/id/8231856-L.jpg">
-<b>Rich Dad Poor Dad</b>
+<h3>Rich Dad Poor Dad</h3>
 <p>₹399</p>
-<button onclick="add('Rich Dad Poor Dad')">Add to Cart</button>
+<button>Add to Cart</button>
 </div>
 
-<div class="card product">
+<div class="card" data-cat="fiction" data-name="The Alchemist">
 <img src="https://covers.openlibrary.org/b/id/11153261-L.jpg">
-<b>The Alchemist</b>
+<h3>The Alchemist</h3>
 <p>₹299</p>
-<button onclick="add('The Alchemist')">Add to Cart</button>
+<button>Add to Cart</button>
+</div>
+
+<div class="card" data-cat="fiction" data-name="Harry Potter">
+<img src="https://covers.openlibrary.org/b/id/7984916-L.jpg">
+<h3>Harry Potter</h3>
+<p>₹599</p>
+<button>Add to Cart</button>
 </div>
 
 </div>
-</div>
-
-<!-- CART -->
-<div id="cart" style="display:none;">
-<h2>🛒 Cart</h2>
-<div id="cartBox"></div>
-</div>
-
-<!-- ORDERS -->
-<div id="orders" style="display:none;">
-<h2>📦 Live Orders</h2>
-<div id="feed"></div>
-</div>
-
-<!-- ANALYTICS -->
-<div id="analytics" style="display:none;">
-<h2>📈 Analytics</h2>
-<div class="card">Growth Simulation Running...</div>
-</div>
-
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast">Action Done</div>
 
 <script>
 
-let cart=[];
+let currentCat="all";
 
-/* NAV */
-function show(id){
-["dash","store","cart","orders","analytics"].forEach(x=>{
-document.getElementById(x).style.display="none";
-});
-document.getElementById(id).style.display="block";
+/* SEARCH */
+function filter(){
+let val=document.getElementById("search").value.toLowerCase();
+let cards=document.querySelectorAll(".card");
 
-if(id==="cart") renderCart();
+cards.forEach(c=>{
+let name=c.getAttribute("data-name").toLowerCase();
+
+if(name.includes(val)){
+c.style.display="block";
+c.style.animation="fadeUp 0.4s ease";
+}else{
+c.style.display="none";
 }
-
-/* CART */
-function add(item){
-cart.push(item);
-toast();
-}
-
-/* CART RENDER */
-function renderCart(){
-let box=document.getElementById("cartBox");
-box.innerHTML="";
-cart.forEach(c=>{
-box.innerHTML+=`<div class="card">${c}</div>`;
 });
 }
 
-/* TOAST */
-function toast(){
-let t=document.getElementById("toast");
-t.style.display="block";
-setTimeout(()=>t.style.display="none",1000);
+/* CATEGORY FILTER */
+function setCat(cat){
+currentCat=cat;
+let cards=document.querySelectorAll(".card");
+
+cards.forEach(c=>{
+let ccat=c.getAttribute("data-cat");
+
+if(cat==="all" || ccat===cat){
+c.style.display="block";
+}else{
+c.style.display="none";
+}
+});
 }
 
-/* FAKE LIVE SYSTEM */
-function startFakeSystem(){
-
+/* SMALL LIVE EFFECT */
 setInterval(()=>{
-
-document.getElementById("rev").innerText =
-parseInt(document.getElementById("rev").innerText)+Math.floor(Math.random()*100);
-
-document.getElementById("ord").innerText =
-parseInt(document.getElementById("ord").innerText)+1;
-
-document.getElementById("usr").innerText =
-parseInt(document.getElementById("usr").innerText)+(Math.random()>0.7?1:0);
-
-/* fake orders feed */
-let names=["Rahul","Aman","Neha","Vikas","John"];
-let books=["Atomic Habits","Rich Dad Poor Dad","The Alchemist"];
-
-document.getElementById("feed").innerHTML =
-`<div class="card">${names[Math.floor(Math.random()*5)]} bought ${books[Math.floor(Math.random()*3)]}</div>`
-+ document.getElementById("feed").innerHTML;
-
+let cards=document.querySelectorAll(".card");
+cards.forEach(c=>{
+c.style.boxShadow="0 0 10px rgba(34,197,94,0.1)";
+});
 },2000);
-
-}
-
-/* start immediately */
-startFakeSystem();
 
 </script>
 
