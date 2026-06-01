@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopVerse Level 2</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f1f3f6;
+transition:0.3s;
+}
+
+/* DARK MODE */
+body.dark{
+background:#0f172a;
+color:white;
+}
+
+header{
+background:#131921;
+color:white;
+display:flex;
+justify-content:space-between;
+padding:12px;
+align-items:center;
+position:sticky;
+top:0;
+}
+
+.search input{
+padding:7px;
+border:none;
+border-radius:5px;
+width:160px;
+}
+
+/* GRID */
+.container{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px;
+padding:10px;
+}
+
+@media(max-width:800px){
+.container{grid-template-columns:1fr;}
+}
+
+.card{
+background:white;
+padding:10px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+body.dark .card{
+background:#1e293b;
+color:white;
+}
+
+.btn{
+background:#ff9900;
+border:none;
+padding:8px;
+width:100%;
+border-radius:20px;
+cursor:pointer;
+}
+
+.topbar{
+display:flex;
+gap:10px;
+cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<div>🛒 ShopVerse Level 2</div>
+
+<div class="topbar">
+<div onclick="toggleDark()">🌙</div>
+<div onclick="toggleWish()">🤍</div>
+<div onclick="showCart()">🛒</div>
+</div>
+</header>
+
+<div class="container" id="box"></div>
+
+<script>
+
+/* PRODUCTS */
+let data=[
+{name:"Headphones",price:999},
+{name:"Smart Watch",price:1999},
+{name:"Shoes",price:1499},
+{name:"Laptop",price:45999},
+{name:"Camera",price:29999}
+];
+
+/* LOAD FROM STORAGE */
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let wish = JSON.parse(localStorage.getItem("wish")) || [];
+let dark = localStorage.getItem("dark") === "true";
+
+/* APPLY DARK MODE */
+if(dark){
+document.body.classList.add("dark");
+}
+
+function save(){
+localStorage.setItem("cart",JSON.stringify(cart));
+localStorage.setItem("wish",JSON.stringify(wish));
+localStorage.setItem("dark",dark);
+}
+
+/* RENDER */
+function render(){
+let box=document.getElementById("box");
+box.innerHTML="";
+
+data.forEach((p,i)=>{
+box.innerHTML+=`
+<div class="card">
+<h3>${p.name}</h3>
+<p>₹${p.price}</p>
+<button class="btn" onclick="add(${i})">Add to Cart</button>
+<button class="btn" onclick="addWish(${i})" style="margin-top:5px;background:#444;">Wishlist</button>
+</div>
+`;
+});
+}
+
+function add(i){
+cart.push(data[i]);
+save();
+alert("Added to Cart");
+}
+
+function addWish(i){
+wish.push(data[i]);
+save();
+alert("Added to Wishlist");
+}
+
+/* DARK MODE */
+function toggleDark(){
+dark = !dark;
+document.body.classList.toggle("dark");
+save();
+}
+
+/* CART */
+function showCart(){
+alert("Cart Items: " + cart.length);
+}
+
+/* WISHLIST */
+function toggleWish(){
+alert("Wishlist Items: " + wish.length);
+}
+
+render();
+
+</script>
+
+</body>
+</html>
