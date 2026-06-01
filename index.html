@@ -3,170 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ShopVerse Level 2</title>
+<title>BookVerse Full Stack</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#f1f3f6;
-transition:0.3s;
-}
-
-/* DARK MODE */
-body.dark{
-background:#0f172a;
+background:#0b1220;
 color:white;
 }
 
-header{
-background:#131921;
-color:white;
+.center{
+height:100vh;
 display:flex;
-justify-content:space-between;
-padding:12px;
+flex-direction:column;
+justify-content:center;
 align-items:center;
-position:sticky;
-top:0;
 }
 
-.search input{
-padding:7px;
-border:none;
-border-radius:5px;
-width:160px;
-}
-
-/* GRID */
-.container{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:12px;
+input{
 padding:10px;
+margin:5px;
+width:220px;
+border-radius:8px;
+border:none;
 }
 
-@media(max-width:800px){
-.container{grid-template-columns:1fr;}
+button{
+padding:10px;
+width:220px;
+margin-top:5px;
+border:none;
+border-radius:20px;
+background:#22c55e;
+cursor:pointer;
+font-weight:bold;
+}
+
+.app{
+display:none;
+padding:15px;
 }
 
 .card{
-background:white;
+background:rgba(255,255,255,0.05);
 padding:10px;
+margin:10px 0;
 border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
-body.dark .card{
-background:#1e293b;
-color:white;
-}
-
-.btn{
-background:#ff9900;
-border:none;
-padding:8px;
-width:100%;
-border-radius:20px;
-cursor:pointer;
-}
-
-.topbar{
+.row{
 display:flex;
 gap:10px;
-cursor:pointer;
+flex-wrap:wrap;
+}
+
+.smallbtn{
+width:auto;
+padding:6px 10px;
+border-radius:10px;
 }
 </style>
-
 </head>
 
 <body>
 
-<header>
-<div>🛒 ShopVerse Level 2</div>
+<!-- AUTH -->
+<div class="center" id="auth">
+<h2>📚 BookVerse Login</h2>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
 
-<div class="topbar">
-<div onclick="toggleDark()">🌙</div>
-<div onclick="toggleWish()">🤍</div>
-<div onclick="showCart()">🛒</div>
+<button onclick="signup()">Signup</button>
+<button onclick="login()">Login</button>
 </div>
-</header>
 
-<div class="container" id="box"></div>
+<!-- APP -->
+<div class="app" id="app">
+
+<h2>📚 BookVerse Store</h2>
+<button onclick="logout()">Logout</button>
+
+<h3>Products</h3>
+<div id="products"></div>
+
+<h3>Cart</h3>
+<div id="cart"></div>
+
+<h3>Orders</h3>
+<div id="orders"></div>
+
+</div>
 
 <script>
 
-/* PRODUCTS */
-let data=[
-{name:"Headphones",price:999},
-{name:"Smart Watch",price:1999},
-{name:"Shoes",price:1499},
-{name:"Laptop",price:45999},
-{name:"Camera",price:29999}
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* AUTH */
+function signup(){
+auth.createUserWithEmailAndPassword(email.value, pass.value);
+}
+
+function login(){
+auth.signInWithEmailAndPassword(email.value, pass.value);
+}
+
+function logout(){
+auth.signOut();
+}
+
+/* STATE */
+auth.onAuthStateChanged(user=>{
+if(user){
+document.getElementById("auth").style.display="none";
+document.getElementById("app").style.display="block";
+loadProducts();
+loadCart();
+loadOrders();
+}else{
+document.getElementById("auth").style.display="flex";
+document.getElementById("app").style.display="none";
+}
+});
+
+/* PRODUCTS (STATIC) */
+let products=[
+"Atomic Habits",
+"Rich Dad Poor Dad",
+"The Alchemist",
+"Deep Work"
 ];
 
-/* LOAD FROM STORAGE */
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let wish = JSON.parse(localStorage.getItem("wish")) || [];
-let dark = localStorage.getItem("dark") === "true";
-
-/* APPLY DARK MODE */
-if(dark){
-document.body.classList.add("dark");
-}
-
-function save(){
-localStorage.setItem("cart",JSON.stringify(cart));
-localStorage.setItem("wish",JSON.stringify(wish));
-localStorage.setItem("dark",dark);
-}
-
-/* RENDER */
-function render(){
-let box=document.getElementById("box");
+function loadProducts(){
+let box=document.getElementById("products");
 box.innerHTML="";
 
-data.forEach((p,i)=>{
+products.forEach(p=>{
 box.innerHTML+=`
 <div class="card">
-<h3>${p.name}</h3>
-<p>₹${p.price}</p>
-<button class="btn" onclick="add(${i})">Add to Cart</button>
-<button class="btn" onclick="addWish(${i})" style="margin-top:5px;background:#444;">Wishlist</button>
+<b>${p}</b><br>
+<button class="smallbtn" onclick="addCart('${p}')">Add to Cart</button>
 </div>
 `;
 });
 }
 
-function add(i){
-cart.push(data[i]);
-save();
-alert("Added to Cart");
-}
-
-function addWish(i){
-wish.push(data[i]);
-save();
-alert("Added to Wishlist");
-}
-
-/* DARK MODE */
-function toggleDark(){
-dark = !dark;
-document.body.classList.toggle("dark");
-save();
-}
-
 /* CART */
-function showCart(){
-alert("Cart Items: " + cart.length);
+function addCart(book){
+let user=auth.currentUser;
+
+db.collection("cart").add({
+user:user.email,
+book:book
+});
+
+loadCart();
 }
 
-/* WISHLIST */
-function toggleWish(){
-alert("Wishlist Items: " + wish.length);
+/* LOAD CART */
+function loadCart(){
+let box=document.getElementById("cart");
+box.innerHTML="";
+
+db.collection("cart")
+.where("user","==",auth.currentUser.email)
+.get()
+.then(snap=>{
+snap.forEach(doc=>{
+box.innerHTML+=`
+<div class="card">
+${doc.data().book}
+</div>
+`;
+});
+});
 }
 
-render();
+/* PLACE ORDER */
+function placeOrder(book){
+let user=auth.currentUser;
+
+db.collection("orders").add({
+user:user.email,
+book:book,
+status:"Processing"
+});
+
+loadOrders();
+}
+
+/* ORDERS */
+function loadOrders(){
+let box=document.getElementById("orders");
+box.innerHTML="";
+
+db.collection("orders")
+.where("user","==",auth.currentUser.email)
+.get()
+.then(snap=>{
+snap.forEach(doc=>{
+box.innerHTML+=`
+<div class="card">
+${doc.data().book} - ${doc.data().status}
+</div>
+`;
+});
+});
+}
 
 </script>
 
